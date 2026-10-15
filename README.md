@@ -66,3 +66,4 @@ The ACES crest lives in `public/logo.png` (in-app) and the PWA/home-screen icons
 - Standard uploads are reliable up to roughly 50 MB. For multi-hundred-MB videos, switch to Supabase resumable (TUS) uploads.
 - Not included yet: push notifications, direct messages, reactions, screen sharing, password reset page (members can use "Email me a sign-in link").
 - Rename the app in `index.html`, `vite.config.ts` and `src/components/AuthScreen.tsx`.
+# ACES-Connect
