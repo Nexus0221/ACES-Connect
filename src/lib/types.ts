@@ -57,3 +57,8 @@ export const POSITIONS = [
 export function canCreateRooms(p: Pick<Profile, 'role' | 'position'>) {
   return p.role === 'admin' || !!p.position
 }
+
+/** Committee members can create rooms but can't hand out roles. Everyone else holding a position can. */
+export function canAssignRoles(p: Pick<Profile, 'role' | 'position'>) {
+  return p.role === 'admin' || (!!p.position && !p.position.endsWith('Committee'))
+}

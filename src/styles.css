@@ -267,3 +267,10 @@ code { background: #e4eae4; padding: 1px 6px; border-radius: 4px; }
 }
 @media (pointer: coarse) { .strip-arrow { display: none; } }
 @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+/* role assignment */
+.modal input:disabled { background: var(--bg, #f3f6f2); color: var(--text); opacity: 1; }
+.role-box { display: grid; gap: 10px; background: #eef3ee; border-radius: 12px; padding: 12px 14px; max-height: 220px; overflow-y: auto; }
+.role-row { display: grid; grid-template-columns: 1fr 1.4fr; align-items: center; gap: 8px; font-weight: 500; }
+.role-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.role-row select { padding: 8px; border-radius: 8px; border: 1px solid #cfd8cf; background: #fff; font: inherit; font-size: 13px; }

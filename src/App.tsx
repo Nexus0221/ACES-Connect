@@ -74,6 +74,12 @@ function Shell({ me }: { me: Profile }) {
   const voice = useVoiceRoom()
   const install = useInstall()
 
+  // If someone changes my role, pick it up without a reload.
+  const myPosition = profiles[me.id]?.position
+  useEffect(() => {
+    if (profiles[me.id] && (myPosition ?? null) !== (me.position ?? null)) refreshProfile()
+  }, [myPosition, me.position, me.id, profiles, refreshProfile])
+
   const [rooms, setRooms] = useState<Room[]>([])
   const [roomId, setRoomId] = useState<string | null>(() => {
     try {
@@ -291,6 +297,7 @@ function Shell({ me }: { me: Profile }) {
       {profileOpen && (
         <ProfileModal
           me={me}
+          profiles={profiles}
           email={session?.user.email ?? ''}
           install={install}
           onClose={() => setProfileOpen(false)}

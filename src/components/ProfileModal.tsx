@@ -2,7 +2,7 @@ import { useRef, useState } from 'react'
 import { Download, LogOut, X } from 'lucide-react'
 import { Avatar } from './Avatar'
 import { supabase } from '../lib/supabase'
-import type { Profile } from '../lib/types'
+import { POSITIONS, canAssignRoles, type Profile } from '../lib/types'
 
 export type InstallInfo = {
   canPrompt: boolean
@@ -13,6 +13,7 @@ export type InstallInfo = {
 
 type Props = {
   me: Profile
+  profiles: Record<string, Profile>
   email: string
   install: InstallInfo
   onClose: () => void
@@ -20,12 +21,26 @@ type Props = {
   onSignOut: () => Promise<void>
 }
 
-export function ProfileModal({ me, email, install, onClose, onSaved, onSignOut }: Props) {
+export function ProfileModal({ me, profiles, email, install, onClose, onSaved, onSignOut }: Props) {
   const [name, setName] = useState(me.display_name)
   const [avatar, setAvatar] = useState(me.avatar_url)
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
+  const [roleMsg, setRoleMsg] = useState<string | null>(null)
+  const canAssign = canAssignRoles(me)
+  const others = Object.values(profiles)
+    .filter((p) => p.id !== me.id)
+    .sort((a, b) => a.display_name.localeCompare(b.display_name))
+
+  async function assignRole(targetId: string, position: string) {
+    setRoleMsg(null)
+    const { error: err } = await supabase.rpc('set_position', {
+      target: targetId,
+      new_position: position || null,
+    })
+    setRoleMsg(err ? err.message : 'Role updated.')
+  }
 
   async function uploadAvatar(file: File) {
     setBusy(true)
@@ -98,7 +113,36 @@ export function ProfileModal({ me, email, install, onClose, onSaved, onSignOut }
           <input value={name} onChange={(e) => setName(e.target.value)} maxLength={40} required />
         </label>
 
+        <label>
+          Role
+          <input value={me.position ?? (me.role === 'admin' ? 'Officer' : 'Member')} readOnly disabled />
+        </label>
+
         <p className="dim">Signed in as {email}</p>
+
+        {canAssign && (
+          <div className="role-box">
+            <strong>Assign roles</strong>
+            {others.length === 0 && <p className="dim">No other members yet.</p>}
+            {others.map((p) => (
+              <label key={p.id} className="role-row">
+                <span>{p.display_name}</span>
+                <select
+                  value={p.position ?? ''}
+                  onChange={(e) => assignRole(p.id, e.target.value)}
+                >
+                  <option value="">Member (no role)</option>
+                  {POSITIONS.map((pos) => (
+                    <option key={pos} value={pos}>
+                      {pos}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+            {roleMsg && <p className="dim">{roleMsg}</p>}
+          </div>
+        )}
 
         {!install.standalone && (
           <div className="install-box">
