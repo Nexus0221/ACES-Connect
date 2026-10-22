@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Hash, Plus, Volume2 } from 'lucide-react'
 import { Avatar } from './Avatar'
-import type { Profile, Room } from '../lib/types'
+import { canCreateRooms, type Profile, type Room } from '../lib/types'
 
 type Props = {
   me: Profile
@@ -47,13 +47,13 @@ export function Sidebar({
           <Avatar name={me.display_name} src={me.avatar_url} size={64} />
           <span className="me-text">
             <strong>{me.display_name}</strong>
-            <small>{me.role === 'admin' ? 'Officer' : 'Member'}</small>
+            <small>{me.position ?? (me.role === 'admin' ? 'Officer' : 'Member')}</small>
           </span>
         </button>
 
         <div className="rooms-head">
           <h2>Rooms</h2>
-          {me.role === 'admin' && (
+          {canCreateRooms(me) && (
             <button className="icon-btn on-ink" onClick={() => setAdding((v) => !v)} aria-label="New room">
               <Plus size={18} />
             </button>
