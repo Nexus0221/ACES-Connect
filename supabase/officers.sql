@@ -3,6 +3,12 @@
 -- Run once in Supabase → SQL Editor. Safe to re-run.
 -- =====================================================================
 
+-- 0) Make sure the older columns exist (your profiles table was missing "role")
+alter table public.profiles add column if not exists role text not null default 'member';
+alter table public.profiles drop constraint if exists profiles_role_check;
+alter table public.profiles add constraint profiles_role_check check (role in ('member', 'admin'));
+alter table public.profiles add column if not exists avatar_url text;
+
 -- 1) Position column (only admins/you can set it via SQL; members can't edit it)
 alter table public.profiles add column if not exists position text;
 
