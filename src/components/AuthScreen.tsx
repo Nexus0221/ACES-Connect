@@ -1,12 +1,17 @@
 import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 
+const INVITE_CODE = 'ACES'
+
 type Mode = 'signin' | 'signup'
 
 function friendlyError(err: unknown) {
   const msg = err instanceof Error ? err.message : String(err)
-  if (/database error saving new user/i.test(msg) || /invalid invite/i.test(msg)) {
-    return "That invite code isn't valid. Ask an ACES officer for the current code."
+  if (/invalid invite/i.test(msg)) {
+    return "That invite code isn't valid. The code is ACES."
+  }
+  if (/database error saving new user/i.test(msg)) {
+    return 'Sign-up failed on the server (database error). Run supabase/invite-aces.sql in Supabase, then try again.'
   }
   if (/invalid login credentials/i.test(msg)) return 'Email or password is incorrect.'
   if (/email not confirmed/i.test(msg)) {
@@ -37,6 +42,9 @@ export function AuthScreen() {
       if (mode === 'signin') {
         await signIn(email, password)
       } else {
+        if (invite.trim().toUpperCase() !== INVITE_CODE) {
+          throw new Error('Invalid invite code')
+        }
         const needsConfirm = await signUp({
           email,
           password,
@@ -128,7 +136,7 @@ export function AuthScreen() {
               <input
                 value={invite}
                 onChange={(e) => setInvite(e.target.value)}
-                placeholder="From your officers"
+                placeholder="ACES"
                 autoCapitalize="off"
                 autoCorrect="off"
                 required
