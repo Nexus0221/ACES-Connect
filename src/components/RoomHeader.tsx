@@ -4,12 +4,13 @@ import type { VoiceApi } from '../hooks/useVoiceRoom'
 
 type Props = {
   room: Room
+  title?: string
   subtitle: string
   voice: VoiceApi
   onMenu: () => void
 }
 
-export function RoomHeader({ room, subtitle, voice, onMenu }: Props) {
+export function RoomHeader({ room, title, subtitle, voice, onMenu }: Props) {
   const here = voice.activeRoomId === room.id
   const connecting = here && voice.status === 'connecting'
   const connected = here && voice.status === 'connected'
@@ -22,7 +23,7 @@ export function RoomHeader({ room, subtitle, voice, onMenu }: Props) {
       </button>
 
       <div className="room-title">
-        <h1># {room.name}</h1>
+        <h1>{room.is_dm ? title ?? 'Direct message' : `# ${room.name}`}</h1>
         <p>{subtitle}</p>
       </div>
 

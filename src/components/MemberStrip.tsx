@@ -14,7 +14,13 @@ export type StripMember = {
 }
 
 /** The top bar from the wireframe: a horizontally scrolling row of member circles. */
-export function MemberStrip({ members }: { members: StripMember[] }) {
+export function MemberStrip({
+  members,
+  onMessage,
+}: {
+  members: StripMember[]
+  onMessage?: (userId: string) => void
+}) {
   const trackRef = useRef<HTMLDivElement>(null)
   const [atStart, setAtStart] = useState(true)
   const [atEnd, setAtEnd] = useState(true)
@@ -53,14 +59,18 @@ export function MemberStrip({ members }: { members: StripMember[] }) {
 
       <div className="strip-track" ref={trackRef} onScroll={update}>
         {members.map((m) => (
-          <div
+          <button
+            type="button"
             key={m.id}
+            disabled={m.you || !onMessage}
+            onClick={() => onMessage?.(m.id)}
             className={[
               'member',
               m.online ? 'online' : 'offline',
               m.speaking ? 'speaking' : '',
+              !m.you && onMessage ? 'clickable' : '',
             ].join(' ')}
-            title={m.name}
+            title={m.you ? m.name : `Message ${m.name}`}
           >
             <div className="ring">
               <Avatar name={m.name} src={m.avatar} size={52} />
@@ -72,7 +82,7 @@ export function MemberStrip({ members }: { members: StripMember[] }) {
               {!m.inVoice && m.online && <span className="badge dot" aria-label="Online" />}
             </div>
             <span className="member-name">{m.you ? 'You' : m.name.split(' ')[0]}</span>
-          </div>
+          </button>
         ))}
       </div>
 

@@ -6,6 +6,7 @@ import { canCreateRooms, type Profile, type Room } from '../lib/types'
 type Props = {
   me: Profile
   rooms: Room[]
+  dms: { id: string; name: string; avatar: string | null }[]
   selectedId: string | null
   voiceRoomId: string | null
   open: boolean
@@ -19,6 +20,7 @@ type Props = {
 export function Sidebar({
   me,
   rooms,
+  dms,
   selectedId,
   voiceRoomId,
   open,
@@ -89,6 +91,30 @@ export function Sidebar({
             </button>
           ))}
         </nav>
+
+        {dms.length > 0 && (
+          <>
+            <div className="rooms-head">
+              <h2>Direct messages</h2>
+            </div>
+            <nav className="rooms">
+              {dms.map((d) => (
+                <button
+                  key={d.id}
+                  className={`room ${d.id === selectedId ? 'active' : ''}`}
+                  onClick={() => {
+                    onSelect(d.id)
+                    onClose()
+                  }}
+                >
+                  <Avatar name={d.name} src={d.avatar} size={22} />
+                  <span>{d.name}</span>
+                  {d.id === voiceRoomId && <Volume2 size={15} className="live-icon" aria-label="You are in voice here" />}
+                </button>
+              ))}
+            </nav>
+          </>
+        )}
       </aside>
     </>
   )

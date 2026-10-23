@@ -119,9 +119,26 @@ function Shell({ me }: { me: Profile }) {
     }
   }, [loadRooms])
 
+  const channels = useMemo(() => rooms.filter((r) => !r.is_dm), [rooms])
   useEffect(() => {
-    if (rooms.length > 0 && !rooms.some((r) => r.id === roomId)) setRoomId(rooms[0].id)
-  }, [rooms, roomId])
+    if (rooms.length > 0 && !rooms.some((r) => r.id === roomId)) {
+      setRoomId((channels[0] ?? rooms[0]).id)
+    }
+  }, [rooms, channels, roomId])
+
+  // Direct messages: show the other person's name and photo.
+  const dms = useMemo(
+    () =>
+      rooms
+        .filter((r) => r.is_dm)
+        .map((r) => {
+          const otherId = r.dm_user_a === me.id ? r.dm_user_b : r.dm_user_a
+          const other = otherId ? profiles[otherId] : undefined
+          return { id: r.id, otherId: otherId ?? null, name: other?.display_name ?? 'Member', avatar: other?.avatar_url ?? null }
+        })
+        .sort((a, b) => a.name.localeCompare(b.name)),
+    [rooms, profiles, me.id],
+  )
 
   useEffect(() => {
     if (!roomId) return
@@ -133,6 +150,8 @@ function Shell({ me }: { me: Profile }) {
   }, [roomId])
 
   const room = rooms.find((r) => r.id === roomId) ?? null
+  const dmInfo = room?.is_dm ? dms.find((d) => d.id === room.id) : undefined
+  const roomLabel = room?.is_dm ? dmInfo?.name ?? 'Direct message' : room ? `#${room.name}` : ''
   const { messages, loading, hasMore, loadOlder, send, remove } = useMessages(room?.id ?? null)
 
   // Members strip: voice participants while in a call, otherwise the whole roster.
@@ -167,7 +186,11 @@ function Shell({ me }: { me: Profile }) {
   const subtitle =
     voice.status === 'connected' && voice.activeRoomId === room?.id
       ? `${voice.participants.length} in voice`
-      : `${onlineCount} online`
+      : room?.is_dm
+        ? dmInfo?.otherId && online.has(dmInfo.otherId)
+          ? 'Online · private chat'
+          : 'Offline · private chat'
+        : `${onlineCount} online`
 
   const addFiles = useCallback(
     (incoming: File[]) => {
@@ -207,6 +230,18 @@ function Shell({ me }: { me: Profile }) {
     }
   }
 
+  async function openDm(userId: string) {
+    if (userId === me.id) return
+    const { data, error } = await supabase.rpc('open_dm', { other: userId })
+    if (error || !data) {
+      notify(error?.message ?? 'Could not open that chat. Run supabase/dm.sql in Supabase first.')
+      return
+    }
+    await loadRooms()
+    setRoomId(data as string)
+    setSidebarOpen(false)
+  }
+
   async function createRoom(name: string) {
     const { error } = await supabase.from('rooms').insert({ name, created_by: me.id })
     if (error) notify(error.message.includes('duplicate') ? 'A room with that name exists.' : error.message)
@@ -217,7 +252,8 @@ function Shell({ me }: { me: Profile }) {
     <div className="app">
       <Sidebar
         me={me}
-        rooms={rooms}
+        rooms={channels}
+        dms={dms}
         selectedId={roomId}
         voiceRoomId={voice.status === 'idle' ? null : voice.activeRoomId}
         open={sidebarOpen}
@@ -231,7 +267,7 @@ function Shell({ me }: { me: Profile }) {
       />
 
       <main className="main">
-        <MemberStrip members={members} />
+        <MemberStrip members={members} onMessage={openDm} />
 
         <section
           className="center"
@@ -254,6 +290,7 @@ function Shell({ me }: { me: Profile }) {
             <>
               <RoomHeader
                 room={room}
+                title={roomLabel}
                 subtitle={subtitle}
                 voice={voice}
                 onMenu={() => setSidebarOpen(true)}
@@ -266,7 +303,7 @@ function Shell({ me }: { me: Profile }) {
                 messages={messages}
                 profiles={profiles}
                 meId={me.id}
-                isAdmin={me.role === 'admin'}
+                isAdmin={me.role === 'admin' && !room.is_dm}
                 loading={loading}
                 hasMore={hasMore}
                 onLoadOlder={loadOlder}
@@ -284,7 +321,7 @@ function Shell({ me }: { me: Profile }) {
 
         {room && (
           <Composer
-            roomName={room.name}
+            roomName={roomLabel}
             files={files}
             sending={sending}
             onAddFiles={addFiles}

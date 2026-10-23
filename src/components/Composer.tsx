@@ -116,7 +116,7 @@ export function Composer({ roomName, files, sending, onAddFiles, onRemoveFile, o
           ref={taRef}
           value={text}
           rows={1}
-          placeholder={`Message #${roomName}`}
+          placeholder={`Message ${roomName}`}
           onChange={(e) => {
             setText(e.target.value)
             resize()

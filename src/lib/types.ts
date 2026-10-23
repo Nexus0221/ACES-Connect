@@ -10,6 +10,9 @@ export type Room = {
   id: string
   name: string
   description: string | null
+  is_dm?: boolean
+  dm_user_a?: string | null
+  dm_user_b?: string | null
 }
 
 export type Attachment = {

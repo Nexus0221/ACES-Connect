@@ -274,3 +274,10 @@ code { background: #e4eae4; padding: 1px 6px; border-radius: 4px; }
 .role-row { display: grid; grid-template-columns: 1fr 1.4fr; align-items: center; gap: 8px; font-weight: 500; }
 .role-row span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .role-row select { padding: 8px; border-radius: 8px; border: 1px solid #cfd8cf; background: #fff; font: inherit; font-size: 13px; }
+
+/* member circles are buttons now (click = private chat) */
+button.member { background: none; border: 0; padding: 0; font: inherit; color: inherit; cursor: default; }
+button.member.clickable { cursor: pointer; }
+button.member.clickable:hover .ring { box-shadow: 0 0 0 2px var(--gold); }
+button.member.clickable:hover .member-name { color: var(--text); }
+.room .avatar, .room img { flex: none; }
