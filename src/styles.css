@@ -281,3 +281,24 @@ button.member.clickable { cursor: pointer; }
 button.member.clickable:hover .ring { box-shadow: 0 0 0 2px var(--gold); }
 button.member.clickable:hover .member-name { color: var(--text); }
 .room .avatar, .room img { flex: none; }
+
+/* ---------- PWA: install card + offline bar ---------- */
+.install-banner {
+  position: fixed; z-index: 60; left: 50%; transform: translateX(-50%);
+  bottom: calc(14px + var(--sab));
+  width: min(520px, calc(100% - 24px));
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 10px 10px 12px; border-radius: 16px;
+  background: #fff; color: #0a2412; border: 1px solid var(--line);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+.install-banner img { border-radius: 10px; flex: none; }
+.install-text { flex: 1; display: grid; gap: 2px; font-size: 13px; line-height: 1.35; min-width: 0; }
+.install-text strong { font-size: 14px; }
+.install-text span { color: var(--dim); }
+.offline-bar {
+  position: fixed; z-index: 70; top: 0; left: 0; right: 0;
+  padding: calc(6px + var(--sat)) 12px 6px; text-align: center;
+  background: #b45309; color: #fff; font-size: 13px; font-weight: 600;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}

@@ -2,14 +2,10 @@ import { useRef, useState } from 'react'
 import { Download, LogOut, X } from 'lucide-react'
 import { Avatar } from './Avatar'
 import { supabase } from '../lib/supabase'
+import type { InstallInfo } from '../hooks/useInstall'
 import { POSITIONS, canAssignRoles, type Profile } from '../lib/types'
 
-export type InstallInfo = {
-  canPrompt: boolean
-  standalone: boolean
-  isIOS: boolean
-  prompt: () => Promise<void>
-}
+export type { InstallInfo }
 
 type Props = {
   me: Profile
@@ -152,9 +148,13 @@ export function ProfileModal({ me, profiles, email, install, onClose, onSaved, o
                 <Download size={16} />
                 Install on this device
               </button>
+            ) : install.iosNeedsSafari ? (
+              <p className="dim">
+                Open this page in Safari, tap the Share button, then Add to Home Screen.
+              </p>
             ) : install.isIOS ? (
               <p className="dim">
-                In Safari, tap the Share button, then Add to Home Screen.
+                Tap the Share button, then Add to Home Screen.
               </p>
             ) : (
               <p className="dim">

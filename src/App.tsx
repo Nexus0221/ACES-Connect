@@ -13,37 +13,9 @@ import { RoomHeader } from './components/RoomHeader'
 import { VoiceStage } from './components/VoiceStage'
 import { ChatView } from './components/ChatView'
 import { Composer } from './components/Composer'
-import { ProfileModal, type InstallInfo } from './components/ProfileModal'
-
-type BeforeInstallPromptEvent = Event & { prompt: () => Promise<void> }
-
-function useInstall(): InstallInfo {
-  const [evt, setEvt] = useState<BeforeInstallPromptEvent | null>(null)
-  useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault()
-      setEvt(e as BeforeInstallPromptEvent)
-    }
-    window.addEventListener('beforeinstallprompt', handler)
-    return () => window.removeEventListener('beforeinstallprompt', handler)
-  }, [])
-  const standalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    Boolean((navigator as Navigator & { standalone?: boolean }).standalone)
-  const isIOS =
-    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
-  return {
-    canPrompt: Boolean(evt),
-    standalone,
-    isIOS,
-    prompt: async () => {
-      if (!evt) return
-      await evt.prompt()
-      setEvt(null)
-    },
-  }
-}
+import { ProfileModal } from './components/ProfileModal'
+import { InstallBanner } from './components/InstallBanner'
+import { useInstall } from './hooks/useInstall'
 
 function Splash({ text = 'Loading…' }: { text?: string }) {
   return (
@@ -368,6 +340,7 @@ export default function App() {
   return (
     <AuthProvider>
       <Gate />
+      <InstallBanner />
     </AuthProvider>
   )
 }
